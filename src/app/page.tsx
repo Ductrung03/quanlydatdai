@@ -1,103 +1,170 @@
-import Image from "next/image";
+// src/app/dashboard/page.tsx (updated with navigation to land management)
+'use client';
 
-export default function Home() {
+import { useRequireAuth } from '@/hooks/use-auth';
+import { signOut } from 'next-auth/react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AdminGuard, UserGuard } from '@/components/auth/rbac';
+import { User, LogOut, Shield, Users, Map, FileText, Gavel } from 'lucide-react';
+import Link from 'next/link';
+
+export default function DashboardPage() {
+  const { user, isLoading } = useRequireAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/auth/login' });
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-gray-600 mt-2">
+            Chào mừng, <span className="font-semibold">{user?.ho_ten}</span>
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <Button onClick={handleLogout} variant="outline">
+          <LogOut className="h-4 w-4 mr-2" />
+          Đăng xuất
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Thông tin tài khoản</CardTitle>
+            <User className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p className="text-sm">
+                <span className="font-medium">Tên đăng nhập:</span> {user?.name}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Email:</span> {user?.email || 'Chưa cập nhật'}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Vai trò:</span>{' '}
+                <span className={`px-2 py-1 rounded-full text-xs ${
+                  user?.vai_tro === 'admin' 
+                    ? 'bg-red-100 text-red-800' 
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {user?.vai_tro === 'admin' ? 'Quản trị viên' : 'Người dùng'}
+                </span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <UserGuard>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Chức năng người dùng</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link href="/user/land-search">
+                    <Map className="h-4 w-4 mr-2" />
+                    Tìm kiếm đất đai
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link href="/user/auctions">
+                    <Gavel className="h-4 w-4 mr-2" />
+                    Tham gia đấu giá
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link href="/user/history">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Lịch sử giao dịch
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </UserGuard>
+
+        <AdminGuard>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Chức năng quản trị</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link href="/admin/users">
+                    <Users className="h-4 w-4 mr-2" />
+                    Quản lý người dùng
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link href="/admin/thua-dat">
+                    <Map className="h-4 w-4 mr-2" />
+                    Quản lý đất đai
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link href="/admin/auctions">
+                    <Gavel className="h-4 w-4 mr-2" />
+                    Quản lý đấu giá
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </AdminGuard>
+      </div>
+
+      <AdminGuard fallback={
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-gray-500">
+              Bạn cần quyền quản trị để xem các tính năng nâng cao.
+            </p>
+          </CardContent>
+        </Card>
+      }>
+        <Card>
+          <CardHeader>
+            <CardTitle>Thống kê hệ thống (Chỉ dành cho Admin)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">0</div>
+                <div className="text-sm text-gray-600">Tổng người dùng</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">0</div>
+                <div className="text-sm text-gray-600">Thửa đất</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">0</div>
+                <div className="text-sm text-gray-600">Cuộc đấu giá</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">0</div>
+                <div className="text-sm text-gray-600">Tài liệu</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </AdminGuard>
     </div>
   );
 }
